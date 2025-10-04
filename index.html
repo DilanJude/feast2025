@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Choir Hymns (Mobile)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--accent:#2b6cb0;--bg:#f9fafb;--card:#ffffff;--muted:#6b7280}
+    html,body{height:100%;margin:0;font-family:'Noto Sans Sinhala',Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:var(--bg);color:#0f172a;display:flex;align-items:flex-start;justify-content:center;padding:12px}
+    .container{width:100%;max-width:900px}
+
+    header{display:flex;flex-direction:column;gap:8px;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+    .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#4c51bf);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    h1{font-size:18px;margin:0;word-break:break-word}
+    p.subtitle{margin:0;color:var(--muted);font-size:12px;word-break:break-word}
+
+    .card{background:var(--card);border-radius:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);padding:16px;overflow-x:auto}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;border-radius:10px;background:linear-gradient(180deg,#fff,#f6f8fb);box-shadow:inset 0 -1px 0 rgba(0,0,0,0.02);text-align:center;border:1px solid rgba(15,23,42,0.04);cursor:pointer}
+    .btn h2{font-size:14px;margin:4px 0;text-align:center;word-break:break-word}
+    .btn p{font-size:12px;margin:0;color:var(--muted);text-align:center;word-break:break-word}
+
+    .list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .list-item{padding:12px;border-radius:8px;border:1px solid rgba(15,23,42,0.04);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;flex-wrap:wrap}
+    .list-item:hover{background:#fbfdff}
+    .title{font-weight:600;word-break:break-word}
+    .meta{font-size:12px;color:var(--muted);word-break:break-word}
+
+    .hymn-lyrics{white-space:pre-wrap;margin-top:12px;font-size:15px;line-height:1.5;word-break:break-word}
+
+    .topbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .home-link{padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:white;cursor:pointer;flex-shrink:0}
+    .search-input{flex:1;min-width:120px;padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.1)}
+
+    @media (max-width:768px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+      h1{font-size:16px}
+      .logo{width:40px;height:40px}
+    }
+
+    @media (max-width:480px){
+      .grid{grid-template-columns:repeat(1,1fr)}
+      body{padding:8px}
+      .card{padding:12px}
+      h1{font-size:15px}
+      .btn{padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">CH</div>
+        <div>
+          <h1>Choir Hymns — Mobile</h1>
+          <p class="subtitle">Easy access to hymn lyrics</p>
+        </div>
+      </div>
+      <div class="topbar">
+        <button class="home-link" id="homeBtn">Home</button>
+      </div>
+    </header>
+
+    <main id="app">
+      <section id="home" class="card">
+        <div class="grid">
+          <div class="btn" data-route="vespers"><h2>Vespers 2025</h2><p>Hymns for vespers services</p></div>
+          <div class="btn" data-route="feast"><h2>Feast 2025</h2><p>Hymns for feast occasions</p></div>
+          <div class="btn" data-route="all"><h2>All Hymns</h2><p>Browse every hymn</p></div>
+        </div>
+      </section>
+
+      <section id="listView" class="card" style="display:none;margin-top:12px">
+        <div class="topbar">
+          <button class="home-link" onclick="go('home')">🏠 Home</button>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search lyrics..." style="display:none">
+        </div>
+        <h3 id="listTitle">Section</h3>
+        <div class="list" id="hymnList"></div>
+      </section>
+
+      <section id="hymnView" class="card" style="display:none;margin-top:12px">
+        <h3 id="hymnTitle">Hymn Title</h3>
+        <div class="meta" id="hymnMeta">Category — ID</div>
+        <div class="hymn-lyrics" id="hymnLyrics"></div>
+      </section>
+
+      <footer style="margin-top:12px;text-align:center;color:var(--muted);font-size:13px">Made for choir practice • Works fully offline</footer>
+    </main>
+  </div>
+
+  <script>
+    const HYMN_DATA = [
+      {id:'v1', title:'Hymn 1', category:'vespers', lyrics:'සිංහල ගීතයේ පද පෙළ මෙහි යොදන්න.\nEnglish or Sinhala both supported.'},
+      {id:'v2', title:'Hymn 2', category:'vespers', lyrics:'දෙවියන් වහන්සේගේ නාමයෙන් ගායනා කරමු.'},
+      {id:'f1', title:'Feast Hymn 1', category:'feast', lyrics:'Feast hymn lyrics here.'},
+      {id:'f2', title:'Feast Hymn 2', category:'feast', lyrics:'Feast hymn lyrics here.'},
+      {id:'a1', title:'All Hymn 1', category:'all', lyrics:'All hymn lyrics example Sinhala text here.'},
+      {id:'a2', title:'All Hymn 2', category:'all', lyrics:'All hymn lyrics example 2 here.'}
+    ];
+
+    const homeBtn = document.getElementById('homeBtn');
+    const searchInput = document.getElementById('searchInput');
+
+    function go(route){
+      document.getElementById('home').style.display='none';
+      document.getElementById('listView').style.display='none';
+      document.getElementById('hymnView').style.display='none';
+
+      if(route==='home'){
+        document.getElementById('home').style.display='block';
+        location.hash='';
+        return;
+      }
+
+      const listView = document.getElementById('listView');
+      const listTitle = document.getElementById('listTitle');
+
+      if(route==='vespers' || route==='feast' || route==='all'){
+        listView.style.display='block';
+        listTitle.textContent = route==='vespers'?'Vespers 2025':route==='feast'?'Feast 2025':'All Hymns';
+        searchInput.style.display = route==='all'?'block':'none';
+        searchInput.value='';
+        renderList(route);
+        location.hash = `#${route}`;
+        return;
+      }
+
+      if(route.starts
