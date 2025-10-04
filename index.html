@@ -67,6 +67,7 @@
     </header>
 
     <main id="app">
+      <!-- Home Page -->
       <section id="home" class="card">
         <div class="grid">
           <div class="btn" data-route="vespers"><h2>Vespers 2025</h2><p>Hymns for vespers services</p></div>
@@ -75,6 +76,7 @@
         </div>
       </section>
 
+      <!-- List View -->
       <section id="listView" class="card" style="display:none;margin-top:12px">
         <div class="topbar">
           <button class="home-link" onclick="go('home')">🏠 Home</button>
@@ -84,13 +86,16 @@
         <div class="list" id="hymnList"></div>
       </section>
 
+      <!-- Hymn Detail -->
       <section id="hymnView" class="card" style="display:none;margin-top:12px">
         <h3 id="hymnTitle">Hymn Title</h3>
         <div class="meta" id="hymnMeta">Category — ID</div>
         <div class="hymn-lyrics" id="hymnLyrics"></div>
       </section>
 
-      <footer style="margin-top:12px;text-align:center;color:var(--muted);font-size:13px">Made for choir practice • Works fully offline</footer>
+      <footer style="margin-top:12px;text-align:center;color:var(--muted);font-size:13px">
+        Made for choir practice • Works fully offline
+      </footer>
     </main>
   </div>
 
@@ -102,5 +107,93 @@
       {id:'f2', title:'Feast Hymn 2', category:'feast', lyrics:'Feast hymn lyrics here.'},
       {id:'a1', title:'All Hymn 1', category:'all', lyrics:'All hymn lyrics example Sinhala text here.'},
       {id:'a2', title:'All Hymn 2', category:'all', lyrics:'All hymn lyrics example 2 here.'},
-      {id:'piyanaga', title:'පිය නගා නගා යමු දොත් මුදුන් දී', category:'vespers', lyrics:'පිය නගා නගා යමු දොත් මුදුන් දී\nපුදසුන වෙත දෙවිඳුන්ගේ \nමුළුු දිවියම දෙවිඳුන් හට පුදනට\nඑක පවුලක් ලෙස එකට බෑඳි //\n\nදෙන්න වරම් දෙවි සමිදේ අප හට\nඈප කෑප වන්නට ඔබෙ ජනතා වෙත\nදෙන්න වරම් දෙවි සමිදේ අප හට\nභෙද දුරෑරලා එකමුතු වන්නට'},
-      {id:'piyanaga2', title:'පිය නගා නගා යමු දොත් මුදුන්
+      {id:'piyanaga', title:'පිය නගා නගා යමු දොත් මුදුන් දී', category:'vespers', lyrics:`පිය නගා නගා යමු දොත් මුදුන් දී
+පුදසුන වෙත දෙවිඳුන්ගේ 
+මුළුු දිවියම දෙවිඳුන් හට පුදනට
+එක පවුලක් ලෙස එකට බෑඳි //
+
+දෙන්න වරම් දෙවි සමිදේ අප හට
+ඈප කෑප වන්නට ඔබෙ ජනතා වෙත
+දෙන්න වරම් දෙවි සමිදේ අප හට
+භෙද දුරෑරලා එකමුතු වන්නට`},
+      {id:'piyanaga2', title:'පිය නගා නගා යමු දොත් මුදුන් දී', category:'feast', lyrics:`පිය නගා නගා යමු දොත් මුදුන්...`},
+      {id:'piyanaga3', title:'පිය නගා නගා යමු දොත් මුදුන් දී', category:'all', lyrics:`පිය නගා නගා යමු දොත් මුදුන්...`}
+    ];
+
+    const homeBtn = document.getElementById('homeBtn');
+    const searchInput = document.getElementById('searchInput');
+    const hymnList = document.getElementById('hymnList');
+    const listTitle = document.getElementById('listTitle');
+
+    function go(route){
+      document.getElementById('home').style.display='none';
+      document.getElementById('listView').style.display='none';
+      document.getElementById('hymnView').style.display='none';
+
+      if(route==='home'){
+        document.getElementById('home').style.display='block';
+        location.hash='';
+        return;
+      }
+
+      if(route==='vespers' || route==='feast' || route==='all'){
+        document.getElementById('listView').style.display='block';
+        listTitle.textContent = route==='vespers'?'Vespers 2025':route==='feast'?'Feast 2025':'All Hymns';
+        searchInput.style.display = route==='all'?'block':'none';
+        searchInput.value='';
+        renderList(route);
+        location.hash = `#${route}`;
+        return;
+      }
+
+      if(route.startsWith('hymn-')){
+        const id = route.replace('hymn-','');
+        loadHymn(id);
+      }
+    }
+
+    function renderList(category){
+      hymnList.innerHTML='';
+      let hymns = HYMN_DATA.filter(h => h.category===category || category==='all');
+      hymns.forEach(h => {
+        const div = document.createElement('div');
+        div.className='list-item';
+        div.innerHTML = `<div><div class="title">${h.title}</div><div class="meta">${h.id} • ${h.category}</div></div><div>▶</div>`;
+        div.addEventListener('click',()=> go('hymn-'+h.id));
+        hymnList.appendChild(div);
+      });
+    }
+
+    function loadHymn(id){
+      const hymn = HYMN_DATA.find(h => h.id===id);
+      if(!hymn) return go('home');
+
+      document.getElementById('hymnView').style.display='block';
+      document.getElementById('hymnTitle').textContent = hymn.title;
+      document.getElementById('hymnMeta').textContent = `${hymn.category} • ${hymn.id}`;
+      document.getElementById('hymnLyrics').textContent = hymn.lyrics;
+      location.hash = 'hymn-'+hymn.id;
+    }
+
+    homeBtn.addEventListener('click',()=>go('home'));
+    document.querySelectorAll('.btn').forEach(b => {
+      b.addEventListener('click',()=>go(b.dataset.route));
+    });
+    searchInput.addEventListener('input', ()=>{
+      const term = searchInput.value.toLowerCase();
+      const filtered = HYMN_DATA.filter(h=>h.category==='all' && (h.title.toLowerCase().includes(term) || h.lyrics.toLowerCase().includes(term)));
+      hymnList.innerHTML='';
+      filtered.forEach(h=>{
+        const div = document.createElement('div');
+        div.className='list-item';
+        div.innerHTML = `<div><div class="title">${h.title}</div><div class="meta">${h.id} • ${h.category}</div></div><div>▶</div>`;
+        div.addEventListener('click',()=> go('hymn-'+h.id));
+        hymnList.appendChild(div);
+      });
+    });
+
+    window.addEventListener('hashchange', ()=>{go(location.hash.replace('#',''))});
+    go(location.hash.replace('#','') || 'home');
+  </script>
+</body>
+</html>
